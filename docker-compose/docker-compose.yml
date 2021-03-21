@@ -161,7 +161,7 @@ services:
     ports:
       - "6379:6379"
   apigateway:
-    image: openwhisk/apigateway:nightly
+    image: openwhisk/apigateway:1.0.0
     links:
       - controller:whisk.controller
       - redis:redis.docker
