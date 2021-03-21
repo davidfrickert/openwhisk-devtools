@@ -36,11 +36,11 @@ endif
 DOCKER_HOST_IP ?= $(shell echo ${DOCKER_HOST} | grep -o "[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}" || echo ${LOCAL_IP})
 DOCKER_REGISTRY ?= ""
 DOCKER_IMAGE_PREFIX ?= openwhisk
-DOCKER_IMAGE_TAG ?= nightly
-OPENWHISK_VERSION ?= master
+DOCKER_IMAGE_TAG ?= 1.0.0
+OPENWHISK_VERSION ?= 1.0.0
 OPENWHISK_PROJECT_HOME ?= $(CURDIR)/openwhisk-src
 OPENWHISK_CATALOG_HOME ?= $(CURDIR)/openwhisk-catalog
-WSK_CLI ?= $(OPENWHISK_PROJECT_HOME)/bin/wsk
+WSK_CLI ?= /usr/bin/wsk
 WSK_CLI_VERSION ?= latest
 WSK_CONFIG_FILE=$(CURDIR)/.wskprops
 OPEN_WHISK_DB_PREFIX ?= local_
@@ -68,6 +68,8 @@ lean:	DOCKER_COMPOSE_FILE=docker-compose-lean.yml
 lean:	download-src download-cli docker-pull-lean run hello-world quick-start-info
 
 quick-start: download-src download-cli docker-pull run quick-start-pause hello-world quick-start-info
+
+standalone: download-src docker-pull run
 
 add-catalog: download-catalog init-catalog
 
