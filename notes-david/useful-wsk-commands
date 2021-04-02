@@ -1,0 +1,16 @@
+# OpenWhisk wsk cli tool useful commands
+
+## Create and update actions
+$ wsk -i action create teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim:latest &
+$ wsk -i action update teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim:latest &
+
+## Invoke action
+
+### Only want result
+$ wsk -i action invoke teste --result --param args '["reverseMe"]'
+
+### Want more info (activation id and other stuff)
+$ wsk -i action invoke teste --blocking --param args '["reverseMe"]'
+
+## View logs of a function activation
+$ wsk -i activation logs ACTIVATION_ID
