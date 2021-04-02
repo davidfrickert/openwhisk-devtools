@@ -25,6 +25,7 @@ services:
       COUCHDB_PASSWORD: some_passw0rd
     volumes:
       - ~/tmp/openwhisk/couchdb:/usr/local/var/lib/couchdb:rw
+    restart: unless-stopped
 
   # KAFKA SERVICES
   zookeeper:
@@ -36,6 +37,7 @@ services:
     environment:
       ZOO_SERVERS: server.1=0.0.0.0:2888:3888
       ZOO_MY_ID: 1
+    restart: unless-stopped
   kafka:
     image: wurstmeister/kafka:0.11.0.1
     links:
@@ -50,6 +52,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ~/tmp/openwhisk/kafka:/kafka:rw
+    restart: unless-stopped
 
   # WHISK CONTROLLER
   controller:
@@ -92,6 +95,7 @@ services:
       - "8888:8888"
       - "2551:2551"
       - "9222:9222"
+    restart: unless-stopped
 
   # WHISK INVOKER AGENT
   invoker:
@@ -139,6 +143,7 @@ services:
     ports:
       - "8085:8085"
       - "9333:9222"
+    restart: unless-stopped
 
   # The API Gateway is currently used to expose the Controller API
   #   see apigateway/conf/whisk-docker-compose.conf
@@ -156,10 +161,12 @@ services:
       - ~/tmp/openwhisk/minio:/data:rw
     ports:
       - "9001:9000"
+    restart: unless-stopped
   redis:
     image: redis:2.8
     ports:
       - "6379:6379"
+    restart: unless-stopped
   apigateway:
     image: openwhisk/apigateway:1.0.0
     links:
@@ -185,6 +192,7 @@ services:
       - "443:443"
       - "9000:9000"
       - "9090:8080"
+    restart: unless-stopped
 
   kafka-rest:
     image: confluentinc/cp-kafka-rest:3.3.1
@@ -202,6 +210,7 @@ services:
     depends_on:
       - zookeeper
       - kafka
+    restart: unless-stopped
 
   kafka-topics-ui:
       image: landoop/kafka-topics-ui:0.9.3
@@ -214,3 +223,4 @@ services:
       links:
         - kafka
         - kafka-rest
+      restart: unless-stopped

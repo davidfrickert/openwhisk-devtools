@@ -1,8 +1,0 @@
-{
-  "init": {
-    "name" : "nodejs-package-npm",
-    "main" : "main",
-    "binary": true,
-    "url" : "app/packages/left-pad/"
-  }
-}
