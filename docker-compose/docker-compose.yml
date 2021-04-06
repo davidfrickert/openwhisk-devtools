@@ -87,6 +87,8 @@ services:
 
       CONFIG_akka_actor_provider: cluster
 
+      CONFIG_whisk_concurrencyLimit_max: 20
+
       LOADBALANCER_HOST: ${DOCKER_COMPOSE_HOST}
       LOADBALANCER_HOST_PORT: 443
     volumes:
@@ -133,7 +135,6 @@ services:
       EDGE_HOST_APIPORT: 443
 
       CONFIG_whisk_containerFactory_containerArgs_network: openwhisk_default
-
       WHISK_API_HOST_NAME: ${DOCKER_COMPOSE_HOST}
     volumes:
       - ~/tmp/openwhisk/invoker/logs:/logs
