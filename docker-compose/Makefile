@@ -68,7 +68,7 @@ lean:	download-src download-cli docker-pull-lean run hello-world quick-start-inf
 
 quick-start: download-src download-cli docker-pull run quick-start-pause hello-world quick-start-info
 
-standalone: download-src docker-pull run
+standalone: download-cli docker-pull run
 
 add-catalog: download-catalog init-catalog
 
@@ -363,13 +363,10 @@ init-couchdb:
 		--add-host="db:$${db_ip_address}" \
 		ddragosd/ansible:2.4.0.0-debian8  \
 		sh -c "ansible-playbook setup.yml && ansible-playbook couchdb.yml --tags=ini && ansible-playbook initdb.yml wipe.yml \
-			-e db_host=db -e openwhisk_home=/openwhisk -e db_prefix=$(OPEN_WHISK_DB_PREFIX)"
+			-e db_host=db -e openwhisk_home=/openwhisk -e db_prefix=$(OPEN_WHISK_DB_PREFIX) -e limit_invocations_per_minute=999999 -e limit_invocations_concurrent=999999"
 
 .PHONY: init-whisk-cli
 init-whisk-cli:
-	echo "waiting for the Whisk controller to come up ... "
-	# removed --head from this curl because of an upstream change https://github.com/apache/openwhisk/pull/4494
-	until $$(curl --output /dev/null --silent --fail http://$(DOCKER_HOST_IP):8888/ping); do printf '.'; sleep 5; done
 	echo "initializing CLI properties into $(WSK_CONFIG_FILE)"
 	WSK_CONFIG_FILE=$(WSK_CONFIG_FILE) $(WSK_CLI) property set --auth `cat $(OPENWHISK_PROJECT_HOME)/ansible/files/auth.guest` --apihost https://$(DOCKER_HOST_IP) -i
 
