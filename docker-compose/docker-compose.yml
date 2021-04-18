@@ -90,7 +90,7 @@ services:
       LOADBALANCER_HOST: ${DOCKER_COMPOSE_HOST}
       LOADBALANCER_HOST_PORT: 443
       
-      # CONFIG_whisk_spi_LogStoreProvider: org.apache.openwhisk.core.containerpool.logging.SplunkLogStoreProvider
+      CONFIG_whisk_spi_LogStoreProvider: org.apache.openwhisk.core.containerpool.logging.DockerToActivationLogStoreProvider 
     volumes:
       - ~/tmp/openwhisk/controller/logs:/logs
     ports:
@@ -101,8 +101,7 @@ services:
 
   # WHISK INVOKER AGENT
   invoker:
-    image: custom-invoker
-          #image: ${DOCKER_IMAGE_PREFIX:-openwhisk}/invoker:${DOCKER_IMAGE_TAG:-latest}
+    image: ${DOCKER_IMAGE_PREFIX:-openwhisk}/invoker:${DOCKER_IMAGE_TAG:-latest}
     command: /bin/sh -c "exec /init.sh --id 0 >> /logs/invoker-local_logs.log 2>&1"
     privileged: true
     pid: "host"
