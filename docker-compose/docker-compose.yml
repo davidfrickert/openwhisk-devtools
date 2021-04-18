@@ -87,8 +87,6 @@ services:
 
       CONFIG_akka_actor_provider: cluster
 
-      CONFIG_whisk_concurrencyLimit_max: 20
-
       LOADBALANCER_HOST: ${DOCKER_COMPOSE_HOST}
       LOADBALANCER_HOST_PORT: 443
       
