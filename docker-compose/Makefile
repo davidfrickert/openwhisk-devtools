@@ -15,7 +15,8 @@
 # limitations under the License.
 #
 
-SHELL:=/bin/bash
+SHELL := /bin/bash
+
 UNAME_STR ?= $(shell uname)
 
 # detect local ip of host as this is needed within containers to find the OpenWhisk API container
@@ -190,7 +191,7 @@ download-cli:
 deploy: print-host check-required-ports setup start-docker-compose wait-for-docker-compose-up init-couchdb init-whisk-cli init-api-management
 
 .PHONY: run
-run: start-docker-compose wait-for-docker-compose-up 
+run: start-docker-compose wait-for-docker-compose-up
 
 
 print-host:
