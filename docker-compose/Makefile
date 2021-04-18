@@ -69,7 +69,7 @@ lean:	download-src download-cli docker-pull-lean run hello-world quick-start-inf
 
 quick-start: download-src download-cli docker-pull run quick-start-pause hello-world quick-start-info
 
-standalone: download-cli docker-pull run
+standalone: download-cli docker-pull deploy
 
 add-catalog: download-catalog init-catalog
 
@@ -186,8 +186,12 @@ download-cli:
          echo "Skipping downloading the cli as OPENWHISK_PROJECT_HOME is set to " $(OPENWHISK_PROJECT_HOME); \
 	fi
 
+.PHONY: deploy
+deploy: print-host check-required-ports setup start-docker-compose wait-for-docker-compose-up init-couchdb init-whisk-cli init-api-management
+
 .PHONY: run
-run: print-host check-required-ports setup start-docker-compose wait-for-docker-compose-up init-couchdb init-whisk-cli init-api-management
+run: start-docker-compose wait-for-docker-compose-up 
+
 
 print-host:
 	echo "host ip address: ${DOCKER_HOST_IP}"
