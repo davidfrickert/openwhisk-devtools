@@ -1,8 +1,11 @@
 # OpenWhisk wsk cli tool useful commands
 
 ## Create and update actions
-$ wsk -i action create teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim:latest &
-$ wsk -i action update teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim:latest &
+$ wsk -i action create teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim
+$ wsk -i action update teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim
+
+# Photons
+$ wsk -i action create sleep-photon sleep.jar --docker rfbpb/java8action -c 1
 
 ## Invoke action
 
@@ -14,3 +17,6 @@ $ wsk -i action invoke teste --blocking --param args '["reverseMe"]'
 
 ## View logs of a function activation
 $ wsk -i activation logs ACTIVATION_ID
+
+## stop all functions
+$ docker stop $(docker ps --filter name=wsk0* -aq) && docker rm $(docker ps --filter name=wsk0* -aq)
