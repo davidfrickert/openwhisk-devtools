@@ -20,3 +20,6 @@ $ wsk -i activation logs ACTIVATION_ID
 
 ## stop all functions
 $ docker stop $(docker ps --filter name=wsk0* -aq) && docker rm $(docker ps --filter name=wsk0* -aq)
+
+## measure cold start
+wsk -i action invoke sleep-photon --blocking --param sleep '1000' | tail -n +2 | jq '.annotations[] | select(.key == "waitTime" or .key == "initTime").value' | awk '{sum+=$0} END{print sum}'
