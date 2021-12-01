@@ -1,13 +1,28 @@
 # OpenWhisk wsk cli tool useful commands
 
 ## Create and update actions
-$ wsk -i action create teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim
-$ wsk -i action update teste ../FaaS-GraalVM/target/app.zip --docker davidfrickert/dockerskeleton-slim
+$ wsk -i action create iconify-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:iconify -c 8
 
 # Photons
-$ wsk -i action create sleep-photon sleep.jar --docker rfbpb/java8action -c 1
+wsk -i action create sleep-photon sleep/target/sleep.jar --docker davidfrickert/photon -c 8
+wsk -i action create filehashing-photon filehashing/target/filehashing.jar --docker davidfrickert/photon -c 8
+wsk -i action create video-photon video/target/video.jar --docker davidfrickert/photon -c 8
+wsk -i action create rest-api-photon login/target/login.jar --docker davidfrickert/photon -c 8
+wsk -i action create iconify-photon iconify/target/iconify.jar --docker davidfrickert/photon -c 8
+
 
 ## Invoke action
+wsk -i action invoke sleep-graal -p time 1000 -r
+wsk -i action invoke filehashing-graal -p seed 1 -r
+wsk -i action invoke rest-api-graal -p username 'first' -p password 'strongpassword' -r
+wsk -i action invoke video-graal -p filename 'cat.mp4' -r
+wsk -i action invoke iconify-graal -p filename 'tiger.jpg' -r
+
+wsk -i action invoke sleep-photon -p time 1000 -r
+wsk -i action invoke filehashing-photon -p seed 1 -r
+wsk -i action invoke rest-api-photon -p username 'first' -p password 'strongpassword' -r
+wsk -i action invoke video-photon -p filename 'cat.mp4' -r
+wsk -i action invoke iconify-photon -p filename 'tiger.jpg' -r
 
 ### Only want result
 $ wsk -i action invoke teste --result --param args '["reverseMe"]'
