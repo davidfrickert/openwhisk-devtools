@@ -1,15 +1,24 @@
 # OpenWhisk wsk cli tool useful commands
 
 ## Create and update actions
-$ wsk -i action create iconify-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:iconify -c 8
+wsk -i action create filehashing-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:filehashing -c 8
+wsk -i action create sleep-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:sleep -c 8
+wsk -i action create rest-api-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:rest-api -c 8
+wsk -i action create video-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:video -c 8
+wsk -i action create iconify-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:iconify -c 8
 
 # Photons
-wsk -i action create sleep-photon sleep/target/sleep.jar --docker davidfrickert/photon -c 8
-wsk -i action create filehashing-photon filehashing/target/filehashing.jar --docker davidfrickert/photon -c 8
-wsk -i action create video-photon video/target/video.jar --docker davidfrickert/photon -c 8
-wsk -i action create rest-api-photon login/target/login.jar --docker davidfrickert/photon -c 8
-wsk -i action create iconify-photon iconify/target/iconify.jar --docker davidfrickert/photon -c 8
+wsk -i action create sleep-photon sleep/target/sleep.jar --main ch.ethz.systems.Sleep --docker davidfrickert/photon -c 8
+wsk -i action create filehashing-photon filehashing/target/filehashing.jar --main ch.ethz.systems.FileHashing --docker davidfrickert/photon -c 8
+wsk -i action create video-photon video/target/video.jar --main ch.ethz.systems.FFMPEG --docker davidfrickert/photon -c 8
+wsk -i action create rest-api-photon login/target/login.jar --main ch.ethz.systems.Login --docker davidfrickert/photon -c 8
+wsk -i action create iconify-photon iconify/target/iconify.jar --main pt.ulisboa.ist.Iconify --docker davidfrickert/photon -c 8
 
+wsk -i action delete sleep-photon
+wsk -i action delete filehashing-photon
+wsk -i action delete video-photon
+wsk -i action delete rest-api-photon
+wsk -i action delete iconify-photon
 
 ## Invoke action
 wsk -i action invoke sleep-graal -p time 1000 -r
