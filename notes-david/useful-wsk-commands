@@ -8,11 +8,11 @@ wsk -i action create video-graal --docker davidfrickert/openwhisk-runtime-native
 wsk -i action create iconify-graal --docker davidfrickert/openwhisk-runtime-nativeimage-basefunction:iconify -c 8
 
 # Photons
-wsk -i action create sleep-photon sleep/target/sleep.jar --main ch.ethz.systems.Sleep --docker davidfrickert/photon -c 8
-wsk -i action create filehashing-photon filehashing/target/filehashing.jar --main ch.ethz.systems.FileHashing --docker davidfrickert/photon -c 8
-wsk -i action create video-photon video/target/video.jar --main ch.ethz.systems.FFMPEG --docker davidfrickert/photon -c 8
-wsk -i action create rest-api-photon login/target/login.jar --main ch.ethz.systems.Login --docker davidfrickert/photon -c 8
-wsk -i action create iconify-photon iconify/target/iconify.jar --main pt.ulisboa.ist.Iconify --docker davidfrickert/photon -c 8
+wsk -i action create sleep-photon sleep/target/sleep.jar --main ch.ethz.systems.Sleep --docker davidfrickert/photon:11 -c 8
+wsk -i action create filehashing-photon filehashing/target/filehashing.jar --main ch.ethz.systems.FileHashing --docker davidfrickert/photon:11 -c 8
+wsk -i action create video-photon video/target/video.jar --main ch.ethz.systems.FFMPEG --docker davidfrickert/photon:11 -c 8
+wsk -i action create rest-api-photon login/target/login.jar --main ch.ethz.systems.Login --docker davidfrickert/photon:11 -c 8
+wsk -i action create iconify-photon iconify/target/iconify.jar --main pt.ulisboa.ist.Iconify --docker davidfrickert/photon:11 -c 8
 
 wsk -i action delete sleep-photon
 wsk -i action delete filehashing-photon
