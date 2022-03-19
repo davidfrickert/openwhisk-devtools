@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  sleep-graal:
+    image: davidfrickert/openwhisk-runtime-nativeimage-basefunction:sleep
+    ports:
+      - 8080:8080
+
+
