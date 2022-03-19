@@ -1,0 +1,5 @@
+MAX_CONCURRENCY_CLUSTER=40
+
+./benchmark-graal.sh $MAX_CONCURRENCY_CLUSTER
+sleep 300
+./benchmark-photon.sh $MAX_CONCURRENCY_CLUSTER
