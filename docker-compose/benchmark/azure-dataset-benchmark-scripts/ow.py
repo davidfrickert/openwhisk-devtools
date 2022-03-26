@@ -11,6 +11,7 @@ headers = {
 }
 registry = CollectorRegistry()
 exec_duration = Gauge('function_execution_time', 'Execution time', registry=registry)
+cs = Gauge('cold_start_time', 'Cold start time', registry=registry)
 
 
 def send(function_name, payload):
@@ -19,7 +20,7 @@ def send(function_name, payload):
     json_response = r.json()
     annotations = json_response['annotations']
     wait_time = 0
-    init_time = None
+    init_time = 0
     duration = json_response['duration']
 
     for a in annotations:
@@ -29,12 +30,9 @@ def send(function_name, payload):
         if a['key'] == 'initTime':
             init_time = a['value']
 
-    total_time = wait_time + (init_time if init_time is not None else 0) + duration
+    total_time = wait_time + init_time + duration
 
-    if init_time is not None:
-        cs = Gauge('cold_start_time', 'Cold start time', registry=registry)
-        cs.set(init_time)
-
+    cs.set(init_time)
     exec_duration.set(total_time)
 
     push_to_gateway('146.193.41.231:9092', job=function_name, registry=registry)
