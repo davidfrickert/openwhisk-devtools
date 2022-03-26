@@ -83,7 +83,7 @@ for i in range(1, 1441):
         t = 60 / invocations_current_minute
         for _ in range(invocations_current_minute):
             b_invoke = time.time()
-            ow.send(args.function, '{"time": 1000}')
+            ow.send(args.function, {"time": 1000})
             invoke_elapsed = time.time() - b_invoke
             if t - invoke_elapsed > 0:
                 sleep(t - invoke_elapsed)
