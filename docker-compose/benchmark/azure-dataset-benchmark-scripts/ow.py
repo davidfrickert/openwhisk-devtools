@@ -35,4 +35,4 @@ def send(function_name, payload):
         cs.set(init_time)
     exec_duration.set(total_time)
 
-    push_to_gateway('146.193.41.231:9091', job=function_name, registry=registry)
+    push_to_gateway('146.193.41.231:9092', job=function_name, registry=registry)
