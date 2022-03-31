@@ -1,7 +1,7 @@
 set -eou pipefail
 APP="$1"
 MAIN="$2"
-DATA=$(cat "$3")
+DATA="{\"value\":$(cat "$3")}"
 
 function do_graal_benchmark_docker {
   start_time=$(date +%s.%3N)
