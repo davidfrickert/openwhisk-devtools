@@ -1,7 +1,12 @@
+set -eou pipefail
+APP="$1"
+MAIN="$2"
+DATA=$(cat "$3")
+
 function do_graal_benchmark_docker {
   start_time=$(date +%s.%3N)
   docker-compose -f docker-compose-graal.yml up -d  --force-recreate
-  until curl -s -S -X POST localhost:8080/run -d '{"value": {"time": "1000"}}' > /dev/null; do echo "nop"; done
+  until curl -s -S -X POST localhost:8080/run -d "$DATA" > /dev/null; do echo "nop"; done
   echo ""
   end_time=$(date +%s.%3N)
   elapsed=$(echo "scale=0; ($end_time - $start_time) * 1000 / 1" | bc)
@@ -21,7 +26,7 @@ function do_hotspot_benchmark_docker {
   start_init_time=$(date +%s.%3N)
   python3 ./invoke.py init ch.ethz.systems.Sleep sleep.jar
   end_init_time=$(date +%s.%3N)
-  curl -s -S -X POST localhost:8080/run -d '{"value": {"time": "1000"}}' > /dev/null
+  curl -s -S -X POST localhost:8080/run -d "$DATA" > /dev/null
   echo ""
   end_time=$(date +%s.%3N)
   elapsed=$(echo "scale=0; ($end_time - $start_time) * 1000 / 1" | bc)
@@ -40,7 +45,9 @@ function do_graal_benchmark {
   start_time=$(date +%s.%3N)
   start_graal
   PID=$!
-  curl -s -S -X POST localhost:8080/run -d '{"value": {"time": "1000"}}' > /dev/null
+  until curl -s -S -X POST localhost:8080/run -d "$DATA"; do
+    :
+  done
   echo ""
   end_time=$(date +%s.%3N)
   elapsed=$(echo "scale=0; ($end_time - $start_time) * 1000 / 1" | bc)
@@ -58,9 +65,9 @@ function do_hotspot_benchmark {
   start_hotspot
   PID=$!
   start_init_time=$(date +%s.%3N)
-  python3 ./invoke.py init ch.ethz.systems.Sleep sleep.jar
+  python3 ./invoke.py init "$MAIN" jars/"$APP".jar
   end_init_time=$(date +%s.%3N)
-  curl -s -S -X POST localhost:8080/run -d '{"value": {"time": "1000"}}' > /dev/null
+  curl -s -S -X POST localhost:8080/run -d "$DATA" > /dev/null
   echo ""
   end_time=$(date +%s.%3N)
   elapsed=$(echo "scale=0; ($end_time - $start_time) * 1000 / 1" | bc)
@@ -88,7 +95,7 @@ start_hotspot() {
 }
 
 start_graal() {
-  ./app >/dev/null &
+  ./apps/app-"$APP" >/dev/null &
 }
 
 do_graal_benchmark
