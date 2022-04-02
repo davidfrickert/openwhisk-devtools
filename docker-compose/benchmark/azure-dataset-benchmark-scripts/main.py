@@ -97,6 +97,8 @@ def run_benchmark(function_name, concurrency, memory, unique_id, all_invocations
                     invoke_elapsed = time.time() - b_invoke
                     if t - invoke_elapsed > 0:
                         sleep(t - invoke_elapsed)
+    except Exception as e:
+        print(e)
     finally:
         ow.delete(function_name, unique_id)
 
