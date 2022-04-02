@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import csv
 import time
+import traceback
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
@@ -98,6 +99,7 @@ def run_benchmark(function_name, concurrency, memory, unique_id, all_invocations
                     if t - invoke_elapsed > 0:
                         sleep(t - invoke_elapsed)
     except Exception as e:
+        print(traceback.format_exc())
         print(e)
     finally:
         ow.delete(function_name, unique_id)
