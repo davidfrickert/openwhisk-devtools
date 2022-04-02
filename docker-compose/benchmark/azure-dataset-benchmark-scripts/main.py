@@ -94,7 +94,7 @@ def run_benchmark(function_name, concurrency, memory, unique_id, all_invocations
                 t = 60 / invocations_current_minute
                 for _ in range(invocations_current_minute):
                     b_invoke = time.time()
-                    ow.invoke(function_name, {"time": 1000})
+                    ow.invoke(function_name+unique_id, {"time": 1000})
                     invoke_elapsed = time.time() - b_invoke
                     if t - invoke_elapsed > 0:
                         sleep(t - invoke_elapsed)
