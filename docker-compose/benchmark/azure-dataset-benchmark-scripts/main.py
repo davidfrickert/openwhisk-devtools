@@ -14,7 +14,7 @@ parser.add_argument("-f", "--function", type=str, dest='function', help="Functio
 parser.add_argument("-t", "--threads", type=int, help="Number of threads to process requests")
 parser.add_argument("-c", "--concurrency", type=int, help="Maximum concurrency level allowed (openwhisk)")
 parser.add_argument("-m", "--memory", type=int, help="Maximum memory allowed (openwhisk)")
-parser.add_argument("-nf", "--n-functions", type=str, dest='n_functions',
+parser.add_argument("-nf", "--n-functions", type=int, dest='n_functions',
                     help="Number of functions to create in openwhisk")
 
 args = parser.parse_args()
