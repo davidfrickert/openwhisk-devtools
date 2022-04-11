@@ -12,11 +12,11 @@ parser = ArgumentParser()
 parser.add_argument("--memory-min", type=int, dest='mem_min', required=True, help="Memory min")
 parser.add_argument("--memory-max", type=int, dest='mem_max', required=True, help="Memory max")
 parser.add_argument("-f", "--function", type=str, dest='function', help="Function Name (openwhisk)")
-parser.add_argument("-t", "--threads", type=int, help="Number of threads to process requests")
 parser.add_argument("-c", "--concurrency", type=int, help="Maximum concurrency level allowed (openwhisk)")
 parser.add_argument("-m", "--memory", type=int, help="Maximum memory allowed (openwhisk)")
 parser.add_argument("-nf", "--n-functions", type=int, dest='n_functions',
                     help="Number of functions to create in openwhisk")
+parser.add_argument('--main', type=str, dest='main', help='Main class. Only needed if using JAR files in Openj9 mode')
 
 args = parser.parse_args()
 
@@ -78,11 +78,11 @@ while not success:
             break
 
 print("Starting benchmark")
-pool = ThreadPoolExecutor(max_workers=args.threads)
+pool = ThreadPoolExecutor(max_workers=args.n_functions)
 
 
 def run_benchmark(function_name, concurrency, memory, unique_id, all_invocations):
-    ow.create(function_name, concurrency, memory, unique_id)
+    ow.create(function_name, concurrency, memory, unique_id, main)
     try:
         for m in range(1, 1441):
             invocations_current_minute = int(all_invocations[str(m)])
