@@ -2,7 +2,7 @@ import json
 import subprocess
 
 import urllib3
-from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+from prometheus_client import CollectorRegistry, Gauge, Counter, push_to_gateway
 import requests as requests
 
 ip_address = '146.193.41.200'
@@ -12,11 +12,12 @@ headers = {
     "Content-Type": "application/json",
     "User-Agent": "OpenWhisk-CLI/1.0 (2019-08-10T00:47:48.313+0000) linux amd64"
 }
-registry = CollectorRegistry()
-exec_duration = Gauge('function_execution_time', 'Execution time', registry=registry)
-cs = Gauge('cold_start_time', 'Cold start time', registry=registry)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+global_registry = CollectorRegistry()
+cold_start_counter = Counter('cold_start_counter', 'Cold start counter', registry=global_registry)
+cs = Gauge('cold_start_time', 'Cold start time', registry=global_registry)
+exec_duration = Gauge('function_execution_time', 'Execution time', registry=global_registry)
 
 def create(function_name, concurrency, memory, unique_id):
     cmd = f'wsk --apihost https://{ip_address} ' \
@@ -35,9 +36,14 @@ def delete(function_name, unique_id):
 
 
 def invoke(function_name, payload):
+
     request_url = url % function_name
+
     r = requests.post(request_url, data=json.dumps(payload), headers=headers, verify=False)
     json_response = r.json()
+    
+    print(json_response)
+
     annotations = json_response['annotations']
     wait_time = 0
     init_time = 0
@@ -50,13 +56,15 @@ def invoke(function_name, payload):
         if a['key'] == 'initTime':
             init_time = a['value']
             cs.set(init_time)
+            cold_start_counter.inc()
+        else:
+            cs.set(-50)
 
     total_time = wait_time + init_time + duration
 
     exec_duration.set(total_time)
 
-    push_to_gateway('146.193.41.231:9092', job=function_name, registry=registry)
-
+    push_to_gateway('146.193.41.231:9092', job=function_name, registry=global_registry)    
 
 def execute(command):
     result = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
