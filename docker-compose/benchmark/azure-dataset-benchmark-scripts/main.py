@@ -81,7 +81,7 @@ print("Starting benchmark")
 pool = ThreadPoolExecutor(max_workers=args.n_functions)
 
 
-def run_benchmark(function_name, concurrency, memory, unique_id, all_invocations):
+def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invocations):
     ow.create(function_name, concurrency, memory, unique_id, main)
     try:
         for m in range(1, 1441):
@@ -102,11 +102,11 @@ def run_benchmark(function_name, concurrency, memory, unique_id, all_invocations
         print(traceback.format_exc())
         print(e)
     finally:
-        ow.delete(function_name, unique_id)
+        ow.delete(function_name, unique_id, main)
 
 
 for i in range(args.n_functions):
-    pool.submit(run_benchmark, args.function, args.concurrency, args.memory, str(i), invocations)
+    pool.submit(run_benchmark, args.function, args.concurrency, args.memory, str(i), args.main, invocations)
     sleep(30)
 
 pool.shutdown()
