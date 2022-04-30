@@ -1,5 +1,6 @@
 import json
 import subprocess
+from builtins import function
 
 import urllib3
 from prometheus_client import CollectorRegistry, Gauge, Counter, push_to_gateway
@@ -17,12 +18,12 @@ headers = {
 }
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-global_registry = CollectorRegistry()
-coldstart_registry = CollectorRegistry()
-cold_start_counter = Counter('cold_start_counter', 'Cold start counter', registry=global_registry)
-cs = Gauge('cold_start_time', 'Cold start time', registry=coldstart_registry)
-exec_duration = Gauge('function_execution_time', 'Execution time', registry=global_registry)
+global_registries = {}
+coldstart_registries = {}
 
+cold_start_counters = {}
+cold_start_timers = {}
+exec_durations = {}
 
 def create(function_name, concurrency, memory, docker_tag, main):
     if main:
@@ -51,7 +52,6 @@ def delete(function_name, unique_id, main):
 
 
 def invoke(function_name, payload):
-
     request_url = url % function_name
 
     r = requests.post(request_url, data=json.dumps(payload), headers=headers, verify=False)
@@ -64,22 +64,33 @@ def invoke(function_name, payload):
     init_time = 0
     duration = json_response['duration']
 
+    global_registry = __get_or_insert(global_registries, function_name, lambda: CollectorRegistry())
+
     for a in annotations:
         if a['key'] == 'waitTime':
             wait_time = a['value']
 
         if a['key'] == 'initTime':
             init_time = a['value']
+            coldstart_registry = __get_or_insert(coldstart_registries, function_name, lambda: CollectorRegistry())
+            cs = __get_or_insert(cold_start_timers, function_name, lambda: Gauge('cold_start_time', 'Cold start time', registry=coldstart_registry))
             cs.set(init_time)
             push_to_gateway('146.193.41.231:9092', job=function_name, registry=coldstart_registry)
+            cold_start_counter = __get_or_insert(cold_start_counters, function_name, lambda: Counter('cold_start_counter', 'Cold start counter', registry=global_registry))
             cold_start_counter.inc()
 
     total_time = wait_time + init_time + duration
 
+    exec_duration = __get_or_insert(exec_durations, function_name, lambda: Gauge('function_execution_time', 'Execution time', registry=global_registry))
     exec_duration.set(total_time)
 
     push_to_gateway('146.193.41.231:9092', job=function_name, registry=global_registry)
 
+
+def __get_or_insert(d: dict, key, lazy_value):
+    if key not in dict:
+        d['key'] = lazy_value()
+    return d['key']
 
 def execute(command):
     result = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
