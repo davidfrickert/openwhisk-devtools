@@ -18,8 +18,9 @@ headers = {
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 global_registry = CollectorRegistry()
+coldstart_registry = CollectorRegistry()
 cold_start_counter = Counter('cold_start_counter', 'Cold start counter', registry=global_registry)
-cs = Gauge('cold_start_time', 'Cold start time', registry=global_registry)
+cs = Gauge('cold_start_time', 'Cold start time', registry=coldstart_registry)
 exec_duration = Gauge('function_execution_time', 'Execution time', registry=global_registry)
 
 
@@ -70,9 +71,8 @@ def invoke(function_name, payload):
         if a['key'] == 'initTime':
             init_time = a['value']
             cs.set(init_time)
+            push_to_gateway('146.193.41.231:9092', job=function_name, registry=coldstart_registry)
             cold_start_counter.inc()
-        else:
-            cs.set(-50)
 
     total_time = wait_time + init_time + duration
 
