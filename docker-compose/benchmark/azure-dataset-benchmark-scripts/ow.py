@@ -88,8 +88,8 @@ def invoke(function_name, payload):
 
 def __get_or_insert(d: dict, key, lazy_value):
     if key not in dict:
-        d['key'] = lazy_value()
-    return d['key']
+        d[key] = lazy_value()
+    return d[key]
 
 def execute(command):
     result = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
