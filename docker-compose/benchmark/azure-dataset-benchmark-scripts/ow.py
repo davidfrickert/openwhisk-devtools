@@ -87,7 +87,7 @@ def invoke(function_name, payload):
 
 
 def __get_or_insert(d: dict, key, lazy_value):
-    if key not in dict:
+    if key not in d:
         d[key] = lazy_value()
     return d[key]
 
