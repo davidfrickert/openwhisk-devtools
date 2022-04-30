@@ -1,10 +1,9 @@
 import json
 import subprocess
-from builtins import function
 
+import requests as requests
 import urllib3
 from prometheus_client import CollectorRegistry, Gauge, Counter, push_to_gateway
-import requests as requests
 
 DOCKER_GRAAL = 'davidfrickert/openwhisk-runtime-nativeimage-basefunction'
 DOCKER_OPENJ9 = 'davidfrickert/photon:hotspot'
