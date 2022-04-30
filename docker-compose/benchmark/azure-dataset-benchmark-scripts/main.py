@@ -2,6 +2,7 @@
 import csv
 import time
 import traceback
+import json
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor
 from time import sleep
@@ -16,6 +17,7 @@ parser.add_argument("-c", "--concurrency", type=int, help="Maximum concurrency l
 parser.add_argument("-m", "--memory", type=int, help="Maximum memory allowed (openwhisk)")
 parser.add_argument("-nf", "--n-functions", type=int, dest='n_functions',
                     help="Number of functions to create in openwhisk")
+parser.add_argument("--payload-file", type=str, dest='payload_file', help='Path to a file containing the payload to send')
 parser.add_argument('--main', type=str, dest='main', help='Main class. Only needed if using JAR files in Openj9 mode')
 
 args = parser.parse_args()
@@ -66,10 +68,10 @@ while not success:
     for row in csv_reader:
         if row['HashApp'] == result['app']:
             n_invocations_in_24h = 0
-            for i in range(1, 1441):
+            for i in range(1, 60):
                 n_invocations_in_24h += int(row[str(i)])
             print(f'Usages in 24h - {n_invocations_in_24h}')
-            if n_invocations_in_24h > 300:
+            if n_invocations_in_24h > 10 and n_invocations_in_24h < 100:
                 success = True
                 # print(row)
                 invocations = row
@@ -81,10 +83,14 @@ print("Starting benchmark")
 pool = ThreadPoolExecutor(max_workers=args.n_functions)
 
 
-def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invocations):
-    ow.create(function_name, concurrency, memory, unique_id, main)
+def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invocations, payload_file):
+    with open(payload_file) as pf:
+        payload = json.load(pf)
+
+    fn_b = function_name + f'-{unique_id}-graal' if not main else function_name + f'-{unique_id}-hotspot'
+    ow.create(fn_b, concurrency, memory, function_name,  main)
     try:
-        for m in range(1, 1441):
+        for m in range(1, 60):
             invocations_current_minute = int(all_invocations[str(m)])
 
             print(f"Invocations for current minute: {invocations_current_minute}")
@@ -94,7 +100,7 @@ def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invoc
                 t = 60 / invocations_current_minute
                 for _ in range(invocations_current_minute):
                     b_invoke = time.time()
-                    ow.invoke(function_name+'-'+unique_id, {"time": 1000})
+                    ow.invoke(fn_b, payload)
                     invoke_elapsed = time.time() - b_invoke
                     if t - invoke_elapsed > 0:
                         sleep(t - invoke_elapsed)
@@ -104,9 +110,13 @@ def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invoc
     finally:
         ow.delete(function_name, unique_id, main)
 
+try:
+    for i in range(args.n_functions):
+        pool.submit(run_benchmark, args.function, args.concurrency, args.memory, str(i), args.main, invocations, args.payload_file)
+        sleep(30)
 
-for i in range(args.n_functions):
-    pool.submit(run_benchmark, args.function, args.concurrency, args.memory, str(i), args.main, invocations)
-    sleep(30)
+    pool.shutdown()
+except Exception as e:
+    print('Terminating pool workers')
+    pool.terminate()
 
-pool.shutdown()
