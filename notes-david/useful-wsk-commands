@@ -14,6 +14,13 @@ wsk -i action create video-photon video/target/video.jar --main ch.ethz.systems.
 wsk -i action create rest-api-photon login/target/login.jar --main ch.ethz.systems.Login --docker davidfrickert/photon:11 -c 8
 wsk -i action create iconify-photon iconify/target/iconify.jar --main pt.ulisboa.ist.Iconify --docker davidfrickert/photon:11 -c 8
 
+# Non Concurrent
+
+wsk -i action create sleep-hotspot sleep/target/sleep.jar --main ch.ethz.systems.Sleep --docker davidfrickert/photon:hotspot -c 1
+wsk -i action create filehashing-hotspot filehashing/target/filehashing.jar --main ch.ethz.systems.FileHashing --docker davidfrickert/photon:hotspot -c 1
+wsk -i action create video-hotspot video/target/video.jar --main ch.ethz.systems.FFMPEG --docker davidfrickert/photon:hotspot -c 1
+wsk -i action create rest-api-hotspot login/target/login.jar --main ch.ethz.systems.Login --docker davidfrickert/photon:hotspot -c 1
+
 wsk -i action delete sleep-photon
 wsk -i action delete filehashing-photon
 wsk -i action delete video-photon
