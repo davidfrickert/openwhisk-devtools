@@ -39,9 +39,9 @@ def create(function_name, concurrency, memory, docker_tag, main):
 
 def delete(function_name, unique_id, main):
     if main:
-        fn = f'{function_name}-hotspot-{unique_id}'
+        fn = f'{function_name}-{unique_id}-hotspot'
     else:
-        fn = f'{function_name}-graal-{unique_id}'
+        fn = f'{function_name}-{unique_id}-graal'
 
     cmd = f'wsk --apihost https://{ip_address} ' \
           f'--auth 23bc46b1-71f6-4ed5-8c54-816aa4f8c502:123zO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP ' \
