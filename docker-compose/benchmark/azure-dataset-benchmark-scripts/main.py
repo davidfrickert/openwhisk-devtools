@@ -80,10 +80,11 @@ while not success:
             break
 
 print("Starting benchmark")
-pool = ThreadPoolExecutor(max_workers=args.n_functions)
+functions_pool = ThreadPoolExecutor(max_workers=args.n_functions)
 
 
 def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invocations, payload_file):
+    executors_pool = ThreadPoolExecutor(max_workers=concurrency)
     with open(payload_file) as pf:
         payload = json.load(pf)
 
@@ -97,13 +98,17 @@ def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invoc
             if invocations_current_minute == 0:
                 sleep(60)
             else:
+                b_invoke = time.time()
                 t = 60 / invocations_current_minute
+
                 for _ in range(invocations_current_minute):
-                    b_invoke = time.time()
-                    ow.invoke(fn_b, payload)
-                    invoke_elapsed = time.time() - b_invoke
-                    if t - invoke_elapsed > 0:
-                        sleep(t - invoke_elapsed)
+                    executors_pool.submit(ow.invoke, fn_b, payload)
+                    sleep(t)
+                invoke_elapsed = time.time() - b_invoke
+                # sleep until next minute if we took less than 60s to process all invocations
+                if invoke_elapsed < 60:
+                    sleep(60 - invoke_elapsed)
+
     except Exception as e:
         print(traceback.format_exc())
         print(e)
@@ -112,11 +117,11 @@ def run_benchmark(function_name, concurrency, memory, unique_id, main, all_invoc
 
 try:
     for i in range(args.n_functions):
-        pool.submit(run_benchmark, args.function, args.concurrency, args.memory, str(i), args.main, invocations, args.payload_file)
+        functions_pool.submit(run_benchmark, args.function, args.concurrency, args.memory, str(i), args.main, invocations, args.payload_file)
         sleep(30)
 
-    pool.shutdown()
+    functions_pool.shutdown()
 except Exception as e:
     print('Terminating pool workers')
-    pool.terminate()
+    functions_pool.terminate()
 
