@@ -24,7 +24,11 @@ coldstart_registries = {}
 counters = {}
 timers = {}
 
-BUCKETS = [_ for _ in np.arange(0., 30000., 10.)]
+BUCKETS = np.concatenate((np.arange(0., 100., 10.),
+                          np.arange(120., 500., 20.),
+                          np.arange(550., 2000., 50.),
+                          np.arange(2100., 5000., 100.),
+                          np.arange(5200., 30000., 500.))).tolist()
 
 def create(function_name, concurrency, memory, docker_tag, main):
     if main:
