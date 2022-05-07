@@ -4,6 +4,7 @@ import subprocess
 import requests as requests
 import urllib3
 from prometheus_client import CollectorRegistry, Counter, push_to_gateway, Histogram
+import numpy as np
 
 DOCKER_GRAAL = 'davidfrickert/openwhisk-runtime-nativeimage-basefunction'
 DOCKER_OPENJ9 = 'davidfrickert/photon:hotspot'
@@ -22,6 +23,8 @@ coldstart_registries = {}
 
 counters = {}
 timers = {}
+
+BUCKETS = [_ for _ in np.arange(0., 30000., 10.)]
 
 def create(function_name, concurrency, memory, docker_tag, main):
     if main:
@@ -72,8 +75,8 @@ def invoke(function_name, payload):
             init_time = a['value']
             coldstart_registry = __get_or_insert(coldstart_registries, function_name, lambda: CollectorRegistry())
             cs = __get_or_insert(timers, function_name + "-cs",
-                                 lambda: Histogram('cold_start_time', 'Cold start time', registry=coldstart_registry))
-            cs.observe(init_time / 1000.)
+                                 lambda: Histogram('cold_start_time', 'Cold start time', buckets=BUCKETS, registry=coldstart_registry))
+            cs.observe(init_time)
             push_to_gateway('146.193.41.231:9092', job=function_name + "-cold-starts", registry=coldstart_registry)
             cold_start_counter = __get_or_insert(counters, function_name + "-cs",
                                                  lambda: Counter('cold_start_counter', 'Cold start counter',
@@ -83,9 +86,9 @@ def invoke(function_name, payload):
     total_time = wait_time + init_time + duration
 
     exec_duration = __get_or_insert(timers, function_name + "-ed",
-                                    lambda: Histogram('function_execution_time', 'Execution time',
+                                    lambda: Histogram('function_execution_time', 'Execution time', buckets=BUCKETS,
                                                       registry=global_registry))
-    exec_duration.observe(total_time / 1000.)
+    exec_duration.observe(total_time)
     exec_duration_counter = __get_or_insert(counters, function_name + "-ed",
                                             lambda: Counter('function_execution_count', 'Execution counter',
                                                             registry=global_registry))
