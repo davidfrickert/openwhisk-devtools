@@ -3,7 +3,7 @@ import subprocess
 
 import requests as requests
 import urllib3
-from prometheus_client import CollectorRegistry, Gauge, Counter, push_to_gateway
+from prometheus_client import CollectorRegistry, Counter, push_to_gateway, Histogram
 
 DOCKER_GRAAL = 'davidfrickert/openwhisk-runtime-nativeimage-basefunction'
 DOCKER_OPENJ9 = 'davidfrickert/photon:hotspot'
@@ -20,9 +20,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 global_registries = {}
 coldstart_registries = {}
 
-cold_start_counters = {}
-cold_start_timers = {}
-exec_durations = {}
+counters = {}
+timers = {}
 
 def create(function_name, concurrency, memory, docker_tag, main):
     if main:
@@ -72,16 +71,25 @@ def invoke(function_name, payload):
         if a['key'] == 'initTime':
             init_time = a['value']
             coldstart_registry = __get_or_insert(coldstart_registries, function_name, lambda: CollectorRegistry())
-            cs = __get_or_insert(cold_start_timers, function_name, lambda: Gauge('cold_start_time', 'Cold start time', registry=coldstart_registry))
-            cs.set(init_time)
-            push_to_gateway('146.193.41.231:9092', job=function_name+"-cold-starts", registry=coldstart_registry)
-            cold_start_counter = __get_or_insert(cold_start_counters, function_name, lambda: Counter('cold_start_counter', 'Cold start counter', registry=global_registry))
+            cs = __get_or_insert(timers, function_name + "-cs",
+                                 lambda: Histogram('cold_start_time', 'Cold start time', registry=coldstart_registry))
+            cs.observe(init_time)
+            push_to_gateway('146.193.41.231:9092', job=function_name + "-cold-starts", registry=coldstart_registry)
+            cold_start_counter = __get_or_insert(counters, function_name + "-cs",
+                                                 lambda: Counter('cold_start_counter', 'Cold start counter',
+                                                                 registry=global_registry))
             cold_start_counter.inc()
 
     total_time = wait_time + init_time + duration
 
-    exec_duration = __get_or_insert(exec_durations, function_name, lambda: Gauge('function_execution_time', 'Execution time', registry=global_registry))
-    exec_duration.set(total_time)
+    exec_duration = __get_or_insert(timers, function_name + "-ed",
+                                    lambda: Histogram('function_execution_time', 'Execution time',
+                                                      registry=global_registry))
+    exec_duration.observe(total_time)
+    exec_duration_counter = __get_or_insert(counters, function_name + "-ed",
+                                            lambda: Counter('function_execution_count', 'Execution counter',
+                                                            registry=global_registry))
+    exec_duration_counter.inc()
 
     push_to_gateway('146.193.41.231:9092', job=function_name, registry=global_registry)
 
@@ -90,6 +98,7 @@ def __get_or_insert(d: dict, key, lazy_value):
     if key not in d:
         d[key] = lazy_value()
     return d[key]
+
 
 def execute(command):
     result = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
