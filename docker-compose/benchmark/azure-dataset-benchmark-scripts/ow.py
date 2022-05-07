@@ -74,7 +74,7 @@ def invoke(function_name, payload):
             coldstart_registry = __get_or_insert(coldstart_registries, function_name, lambda: CollectorRegistry())
             cs = __get_or_insert(cold_start_timers, function_name, lambda: Gauge('cold_start_time', 'Cold start time', registry=coldstart_registry))
             cs.set(init_time)
-            push_to_gateway('146.193.41.231:9092', job=function_name, registry=coldstart_registry)
+            push_to_gateway('146.193.41.231:9092', job=function_name+"-cold-starts", registry=coldstart_registry)
             cold_start_counter = __get_or_insert(cold_start_counters, function_name, lambda: Counter('cold_start_counter', 'Cold start counter', registry=global_registry))
             cold_start_counter.inc()
 
